@@ -100,7 +100,7 @@ Ferrule runs entirely on your Mac. It has no account, no telemetry and no server
 
 ## Install
 
-On an Apple Silicon Mac with macOS 14 or newer:
+On any Mac with macOS 14 or newer, Apple Silicon or Intel:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/sree-charan/ferrule/main/install.sh | zsh

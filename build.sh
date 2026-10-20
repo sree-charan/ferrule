@@ -62,7 +62,15 @@ FAN_HELPER_ID="$APP_BUNDLE_ID.fan-control"
 # Sources/NowPlayingAdapter. Staged under Contents/Frameworks, signed on its own.
 NOW_PLAYING_ADAPTER_ID="$APP_BUNDLE_ID.now-playing"
 NOW_PLAYING_ADAPTER="libFerruleNowPlaying.dylib"
-TARGET="arm64-apple-macosx14.0"
+# The app is built for the Mac building it: Apple Silicon (arm64) or Intel
+# (x86_64). FERRULE_ARCH builds for the other one, e.g. to test an Intel build
+# under Rosetta on Apple Silicon.
+ARCH="${FERRULE_ARCH:-$(uname -m)}"
+case "$ARCH" in
+    arm64|x86_64) ;;
+    *) echo "✗ unsupported architecture: $ARCH (arm64 or x86_64)" >&2; exit 1 ;;
+esac
+TARGET="$ARCH-apple-macosx14.0"
 ENTITLEMENTS="Resources/Ferrule.entitlements"
 LEGACY_IDENTITY="Ferrule Signing"
 
@@ -565,6 +573,7 @@ if (( TEST )); then
         Sources/Ferrule/Services/ManagedDownloads/WhatsAppDownloadSupport.swift
         Sources/Ferrule/Core/SecureInputSupport.swift
         Sources/Ferrule/Services/Convert/RecastSupport.swift
+        Sources/Ferrule/Services/SystemMonitor/KernelClock.swift
         Sources/Ferrule/Core/ConvertStrings.swift
         Tests/*.swift
         build/generated-tests/*.swift
@@ -736,7 +745,7 @@ fi
 # its converter is missing).
 if [[ "${SKIP_RECAST:-0}" != "1" ]]; then
     echo "▸ Building Recast's converter…"
-    Tools/build-recast.sh build/recast
+    RECAST_RUNTIME="osx-${ARCH/x86_64/x64}" Tools/build-recast.sh build/recast
     Tools/embed-recast.sh build/recast "$STAGE"
 else
     echo "  Recast not embedded (SKIP_RECAST=1)"

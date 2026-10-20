@@ -327,7 +327,7 @@ final class ProcessUsageService {
                 self.stopNetworkSampler()
                 return
             }
-            let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? mach_absolute_time() : nil
+            let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? KernelClock.now() : nil
             let samples = NetworkProcessSupport.currentActivitySamples()
             guard self.networkSamplerIsCurrent(generation) else { return }
             guard self.networkLeaseIsCurrent() else {
@@ -422,7 +422,7 @@ final class ProcessUsageService {
         cpuLoading = true
         cacheLock.unlock()
 
-        let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? mach_absolute_time() : nil
+        let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? KernelClock.now() : nil
         let current = Self.cpuTimePerPid()
         cpuSampleLock.lock()
         let previous = previousCPUSample
@@ -503,7 +503,7 @@ final class ProcessUsageService {
         memoryLoading = true
         cacheLock.unlock()
 
-        let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? mach_absolute_time() : nil
+        let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? KernelClock.now() : nil
         let result = Shell.run("/bin/ps", ["-Aceo", "pid,rss,comm", "-m"])
         // ps enumerates and ranks the candidates; rss (KiB) is only the
         // fallback value. The figure shown is the kernel's physical
@@ -692,7 +692,7 @@ final class ProcessUsageService {
         gpuLoading = true
         cacheLock.unlock()
 
-        let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? mach_absolute_time() : nil
+        let sampleStartedAt: UInt64? = AppFeature.killProcess.isAvailable ? KernelClock.now() : nil
         let current = Self.gpuTimePerPid()
         gpuSampleLock.lock()
         let previous = previousGPUSample

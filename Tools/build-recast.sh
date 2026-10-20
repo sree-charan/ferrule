@@ -16,7 +16,7 @@ cd "$(dirname "$0")/.."
 
 output="${1:?output folder}"
 recast="Recast"
-runtime="osx-$(uname -m | sed 's/x86_64/x64/')"
+runtime="${RECAST_RUNTIME:-osx-$(uname -m | sed 's/x86_64/x64/')}"
 cache="$HOME/Library/Caches/com.sreecharan.ferrule.build"
 [[ -f "$recast/Recast.slnx" ]] || { echo "build-recast: no Recast source in $recast/" >&2; exit 1; }
 

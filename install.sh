@@ -16,7 +16,6 @@ say() { print -P "%B▸%b $1"; }
 fail() { print -u2 "✗ $1"; exit 1; }
 
 [[ "$(uname -s)" == Darwin ]] || fail "Ferrule runs on macOS."
-[[ "$(uname -m)" == arm64 ]] || fail "Ferrule needs a Mac with Apple Silicon."
 macos_major="$(sw_vers -productVersion | cut -d. -f1)"
 (( macos_major >= 14 )) || fail "Ferrule needs macOS 14 or newer (this Mac has $(sw_vers -productVersion))."
 

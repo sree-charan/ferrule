@@ -22,6 +22,19 @@ enum ProcessForceQuitTests {
     }
 
     static func run(_ suite: TestSuite) {
+        // The kernel stamps processes in its own clock. Natively that is
+        // mach_absolute_time(); under Rosetta mach_absolute_time() is in
+        // nanoseconds while the kernel keeps 24 MHz ticks.
+        suite.expect(KernelClock.convert(3_598_484_498_871, translated: false, tickFrequency: 24_000_000)
+                        == 3_598_484_498_871,
+                     "a native sample time is already in the kernel's units")
+        suite.expect(KernelClock.convert(1_000_000_000, translated: true, tickFrequency: 24_000_000) == 24_000_000
+                        && KernelClock.convert(149_937_377_098_000, translated: true, tickFrequency: 24_000_000)
+                        == 3_598_497_050_352,
+                     "under Rosetta a sample time in nanoseconds becomes kernel ticks")
+        suite.expect(KernelClock.convert(42, translated: true, tickFrequency: nil) == 42,
+                     "without the tick frequency the time is left as it is")
+
         let defaults = UserDefaults.standard
         let featureKey = AppFeature.killProcess.availabilityKey
         let previous = defaults.object(forKey: featureKey)
@@ -33,7 +46,7 @@ enum ProcessForceQuitTests {
             ResponsibleProcess.owners = [:]
         }
 
-        let sampleStartedAt = mach_absolute_time()
+        let sampleStartedAt = KernelClock.now()
         let victim = Process()
         victim.executableURL = URL(fileURLWithPath: "/bin/sleep")
         victim.arguments = ["60"]
@@ -57,7 +70,7 @@ enum ProcessForceQuitTests {
                                                      unsafeOwners: [])
         suite.expect(replaced.first?.startedAt == nil,
                      "a PID replaced during sampling cannot acquire the replacement's identity")
-        let stable = service.withForceQuitIdentity([row], sampleStartedAt: mach_absolute_time(),
+        let stable = service.withForceQuitIdentity([row], sampleStartedAt: KernelClock.now(),
                                                    unsafeOwners: [])
         suite.expect(stable.first?.startedAt == 42,
                      "a process that existed before sampling retains its identity")
@@ -84,7 +97,7 @@ enum ProcessForceQuitTests {
         suite.expect(network.first?.startedAt == nil && network.first?.networkDownBytesPerSec == 10
                      && network.first?.networkUpBytesPerSec == 20,
                      "network rejects a replacement helper while preserving both rates")
-        let stableNetwork = service.groupedNetworkByApp([networkSample], sampleStartedAt: mach_absolute_time())
+        let stableNetwork = service.groupedNetworkByApp([networkSample], sampleStartedAt: KernelClock.now())
         suite.expect(stableNetwork.first?.startedAt == 42,
                      "network binds a stable helper's responsible owner")
 
@@ -97,7 +110,7 @@ enum ProcessForceQuitTests {
 
         defaults.set(false, forKey: featureKey)
         let disabledLookups = KillProcessService.lookups
-        let disabled = service.groupedByApp([row], sampleStartedAt: mach_absolute_time())
+        let disabled = service.groupedByApp([row], sampleStartedAt: KernelClock.now())
         suite.expect(disabled.first?.startedAt == nil && KillProcessService.lookups == disabledLookups,
                      "uninstalled Kill Process skips identity binding during grouping")
         defaults.set(true, forKey: featureKey)
