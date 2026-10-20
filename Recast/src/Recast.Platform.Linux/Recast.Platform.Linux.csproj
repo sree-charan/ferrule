@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Recast.Platform.Linux</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recast.Core\Recast.Core.csproj" />
+    <InternalsVisibleTo Include="Recast.Platform.Tests" />
+  </ItemGroup>
+</Project>

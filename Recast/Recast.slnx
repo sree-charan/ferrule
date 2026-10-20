@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Recast.Core/Recast.Core.csproj" />
+    <Project Path="src/Recast.Engines/Recast.Engines.csproj" />
+    <Project Path="src/Recast.Platform.Windows/Recast.Platform.Windows.csproj" />
+    <Project Path="src/Recast.Platform.Linux/Recast.Platform.Linux.csproj" />
+    <Project Path="src/Recast.Platform.MacOS/Recast.Platform.MacOS.csproj" />
+    <Project Path="src/Recast.App/Recast.App.csproj" />
+    <Project Path="src/Recast.Cli/Recast.Cli.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Recast.Core.Tests/Recast.Core.Tests.csproj" />
+    <Project Path="tests/Recast.Engines.Tests/Recast.Engines.Tests.csproj" />
+    <Project Path="tests/Recast.App.Tests/Recast.App.Tests.csproj" />
+    <Project Path="tests/Recast.Cli.Tests/Recast.Cli.Tests.csproj" />
+    <Project Path="tests/Recast.Platform.Tests/Recast.Platform.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path=".editorconfig" />
+  </Folder>
+</Solution>

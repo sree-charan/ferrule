@@ -1,0 +1,2 @@
+/* Finder's right-click menu: the title of Recast's service (NSServices in Info.plist). */
+"Convert with Recast" = "Recast로 변환";

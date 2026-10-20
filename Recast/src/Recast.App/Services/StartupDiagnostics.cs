@@ -1,0 +1,56 @@
+// What Recast writes to its log before and around start-up: one line describing this launch, and every exception that
+// would otherwise end the process (or vanish in a task) without a trace. A report of a Recast that ignored every
+// gesture came with an empty log; these lines are what tells such cases apart.
+
+using System.Runtime.InteropServices;
+using Recast.Core.Platform;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Recast.App.Services;
+
+internal static class StartupDiagnostics
+{
+    /// <summary>
+    /// A logger for Program, before the service container exists. It writes to the same daily file. A log folder that
+    /// can't be created gives a logger that drops everything: logging must never stop Recast from starting.
+    /// </summary>
+    public static ILogger CreateEarlyLogger(string logDirectory)
+    {
+        try
+        {
+            return new FileLoggerProvider(logDirectory).CreateLogger("Recast.App.Program");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            return NullLogger.Instance;
+        }
+    }
+
+    /// <summary>
+    /// The start-up line: "Recast 1.11.0 starting: C:\…\Recast.exe (installed), integrity Medium, Explorer Medium,
+    /// Microsoft Windows 10.0.26200 X64, 2 argument(s)". Arguments are counted, not written: they are file paths.
+    /// </summary>
+    public static string Describe(string version, string? executable, string installKind, ElevationState elevation,
+        string operatingSystem, int argumentCount) =>
+        $"Recast {version} starting: {executable ?? "(unknown path)"} ({installKind}), {elevation}, {operatingSystem}, " +
+        $"{argumentCount} argument(s)";
+
+    /// <summary>How this copy got here: Setup, a release archive, or a build from source.</summary>
+    public static string InstallKind(bool installed, bool release) =>
+        installed ? "installed" : release ? "portable" : "development build";
+
+    /// <summary>"Microsoft Windows 10.0.26200 X64".</summary>
+    public static string OperatingSystemText() =>
+        $"{RuntimeInformation.OSDescription.Trim()} {RuntimeInformation.OSArchitecture}";
+
+    /// <summary>Writes exceptions from any thread and unobserved task failures to <paramref name="log"/>.</summary>
+    public static void LogUnhandledExceptions(ILogger log)
+    {
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+            log.LogCritical(e.ExceptionObject as Exception, "Unhandled exception (process ending: {Terminating}): {Object}",
+                e.IsTerminating, e.ExceptionObject is Exception ? "see below" : e.ExceptionObject);
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+            log.LogError(e.Exception, "A background task failed and nobody looked at the error");
+    }
+}

@@ -1,0 +1,26 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Recast.App"
+             x:Class="Recast.App.App"
+             Name="Recast"
+             RequestedThemeVariant="Default">
+
+  <Application.DataTemplates>
+    <!-- Maps FooPageViewModel → FooPage view (see ViewLocator.cs). -->
+    <local:ViewLocator />
+  </Application.DataTemplates>
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://Recast/Styles/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://Recast/Styles/Soft.axaml" />
+    <StyleInclude Source="avares://Recast/Styles/TagEditor.axaml" />
+  </Application.Styles>
+</Application>

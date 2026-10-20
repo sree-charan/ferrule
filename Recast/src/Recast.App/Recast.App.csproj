@@ -1,0 +1,68 @@
+<!--
+  Recast.App: the Avalonia desktop application (tray, donut toolbar, settings window).
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>Recast</AssemblyName>
+    <RootNamespace>Recast.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Icons\recast.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Recast.Core\Recast.Core.csproj" />
+    <ProjectReference Include="..\Recast.Engines\Recast.Engines.csproj" />
+    <ProjectReference Include="..\Recast.Platform.Windows\Recast.Platform.Windows.csproj" />
+    <ProjectReference Include="..\Recast.Platform.Linux\Recast.Platform.Linux.csproj" />
+    <ProjectReference Include="..\Recast.Platform.MacOS\Recast.Platform.MacOS.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Markdig" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="SharpHook" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+    <!-- Shown on the About page. -->
+    <AvaloniaResource Include="..\..\THIRD-PARTY-NOTICES.md" Link="Assets\THIRD-PARTY-NOTICES.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Recast.App.Tests" />
+  </ItemGroup>
+
+  <!-- Native debug symbols from NuGet packages (SkiaSharp, HarfBuzz: ~100 MB) are useless to users. -->
+  <Target Name="RecastRemoveNativeSymbols" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <_RecastNativePdb Include="$(PublishDir)lib*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_RecastNativePdb)" />
+  </Target>
+
+  <!-- Repository URL for the updater / About page, taken from Directory.Build.props. -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RepositoryUrl</_Parameter1>
+      <_Parameter2>$(RecastRepositoryUrl)</_Parameter2>
+    </AssemblyAttribute>
+    <!-- Published builds (installer, portable zip) set -p:RecastRelease=true: only they register Explorer and startup
+         entries (UpdateService.IsReleaseBuild), so running from source leaves the user's system alone. -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(RecastRelease)' == 'true'">
+      <_Parameter1>RecastRelease</_Parameter1>
+      <_Parameter2>true</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
